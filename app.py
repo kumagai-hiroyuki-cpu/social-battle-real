@@ -97,7 +97,7 @@ if st.session_state.page == "menu":
     st.write("---")
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("🏠 ルームを作成 (ホスト)", type="primary"):
+        if st.button("🏠 ルームを作成 (ホスト)", type="primary", key="btn_create_room"):
             code = str(random.randint(1000, 9999))
             st.session_state.room_code = code
             st.session_state.is_host = True
@@ -114,7 +114,7 @@ if st.session_state.page == "menu":
             st.rerun()
     with col2:
         input_code = st.text_input("ルームコード(4桁)")
-        if st.button("🚪 ルームに参加 (ゲスト)"):
+        if st.button("🚪 ルームに参加 (ゲスト)", key="btn_join_room"):
             if input_code:
                 data = fb_get(f"rooms/{input_code}")
                 if data:
@@ -213,7 +213,7 @@ elif st.session_state.page == "battle_view":
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            if st.button(f"👑 {host_name} の勝ち (+1)", type="primary"):
+            if st.button(f"👑 {host_name} の勝ち (+1)", type="primary", key=f"host_win_r{st.session_state.round}"):
                 if st.session_state.is_host:
                     new_p1 = data.get("scoreP1", 0) + 1
                     fb_patch(f"rooms/{st.session_state.room_code}", {"scoreP1": new_p1})
@@ -221,11 +221,11 @@ elif st.session_state.page == "battle_view":
                 st.session_state.page = "round_end"
                 st.rerun()
         with col2:
-            if st.button("🤝 引き分け (ドロー)"):
+            if st.button("🤝 引き分け (ドロー)", key=f"draw_r{st.session_state.round}"):
                 st.session_state.page = "round_end"
                 st.rerun()
         with col3:
-            if st.button(f"👑 {guest_name} の勝ち (+1)", type="primary"):
+            if st.button(f"👑 {guest_name} の勝ち (+1)", type="primary", key=f"guest_win_r{st.session_state.round}"):
                 if st.session_state.is_host:
                     new_p2 = data.get("scoreP2", 0) + 1
                     fb_patch(f"rooms/{st.session_state.room_code}", {"scoreP2": new_p2})
@@ -249,7 +249,7 @@ elif st.session_state.page == "round_end":
     
     st.write("---")
     if st.session_state.round < 3:
-        if st.button("次ラウンド（第 ➔ ラウンド）へ進む", type="primary"):
+        if st.button("次ラウンドへ進む ➔", type="primary", key=f"next_round_{st.session_state.round}"):
             st.session_state.round += 1
             if st.session_state.is_host:
                 fb_patch(f"rooms/{st.session_state.room_code}", {
@@ -259,7 +259,7 @@ elif st.session_state.page == "round_end":
             st.session_state.page = "input"
             st.rerun()
     else:
-        if st.button("🎉 最終結果（表彰式）へ進む", type="primary"):
+        if st.button("🎉 最終結果（表彰式）へ進む", type="primary", key="final_results_btn"):
             st.session_state.page = "final"
             st.rerun()
 
@@ -288,6 +288,6 @@ elif st.session_state.page == "final":
     st.metric(label="最終勝利数", value=f"{host_n} [{p1}勝] - [{p2}勝] {guest_n}")
     
     st.write("---")
-    if st.button("タイトルに戻る"):
+    if st.button("タイトルに戻る", key="back_to_menu_btn"):
         st.session_state.page = "menu"
         st.rerun()
